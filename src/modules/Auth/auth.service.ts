@@ -46,6 +46,7 @@ export class AuthService {
 
     const tokenPayload: TJWTPayload = {
       id: user.id,
+      role: user.role,
     };
 
     const accessToken = jwt.sign(

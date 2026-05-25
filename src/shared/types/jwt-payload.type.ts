@@ -1,6 +1,6 @@
-// import { RoleEntityDto } from '@modules/Role/dto/output/role.entity.dto';
+import { RoleKeyEnum } from '@shared/enums/role.enum';
 
 export type TJWTPayload = {
   id: string;
-  // roles: RoleEntityDto[];
+  role: RoleKeyEnum;
 };

@@ -1,3 +1,4 @@
+import { PaginateParamDto } from '@shared/dtos/params/paginate.param.dto';
 import { TPaginationMeta } from '@shared/types/pagination-meta.type';
 import {
   TResponse,
@@ -54,18 +55,19 @@ export type WrapperPaginationResponseParams<T> = Omit<
   statusCode?: number;
   data: T[];
   count: number;
+  query: PaginateParamDto;
 };
 export const paginationResponse = <T>(
   params: WrapperPaginationResponseParams<T>,
 ): TResponsePagination<T> => {
-  const { statusCode = 200, data = [], message } = params;
+  const { statusCode = 200, data = [], message, query } = params;
 
   const meta: TPaginationMeta = {
     totalAllData: params.count,
     totalView: data.length,
-    maxView: data.length,
-    currentPage: 1,
-    totalPage: 1,
+    maxView: query.perPage,
+    currentPage: query.page,
+    totalPage: Math.ceil(params.count / query.perPage),
   };
 
   return {

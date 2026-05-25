@@ -3,7 +3,7 @@ import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 import { OrderKeyEnum } from '@shared/enums/order.enum';
 
-export class QueryPayloadDto {
+export class PaginateParamDto {
   @IsOptional()
   @IsString()
   search?: string; // Optional: Search parameter
@@ -12,14 +12,14 @@ export class QueryPayloadDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  page?: number = 1; // Default to page 1
+  page: number = 1; // Default to page 1
 
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(100)
-  row?: number = 10; // Default to 10 items per page
+  perPage: number = 10; // Default to 10 items per page
 
   @IsOptional()
   @IsString()
@@ -28,5 +28,5 @@ export class QueryPayloadDto {
   @IsOptional()
   @Transform(({ value }) => `${value}`.toLowerCase())
   @IsEnum(OrderKeyEnum)
-  order?: OrderKeyEnum | OrderKeyEnum.ASC; // Optional: Sort parameter
+  order?: OrderKeyEnum = OrderKeyEnum.DESC; // Optional: Sort parameter
 }

@@ -1,0 +1,76 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
+import * as wrapper from '@shared/utils/wrapper';
+import { Roles } from '@shared/decorators/role.decorator';
+import { RoleKeyEnum } from '@shared/enums/role.enum';
+import { UserService } from './user.service';
+import { UserPaginateParamDto } from './dtos/params/user-paginate.param.dto';
+import { UserCreateParamDto } from './dtos/params/user-create.param.dto';
+import { UserUpdateParamDto } from './dtos/params/user-update.param.dto';
+
+@Controller({
+  path: 'users',
+  version: '1',
+})
+export class UserController {
+  constructor(private readonly userService: UserService) {}
+
+  @Post()
+  @Roles([RoleKeyEnum.ADMIN])
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() payload: UserCreateParamDto) {
+    const result = await this.userService.create(payload);
+    return wrapper.response({
+      statusCode: HttpStatus.CREATED,
+      data: result,
+      message: 'User created successfully',
+    });
+  }
+
+  @Get()
+  async paginate(@Query() query: UserPaginateParamDto) {
+    const [data, count] = await this.userService.paginate(query);
+    return wrapper.paginationResponse({
+      data,
+      count,
+      query,
+      message: 'Users retrieved successfully',
+    });
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const result = await this.userService.findOne(id);
+    return wrapper.response({
+      data: result,
+      message: 'User retrieved successfully',
+    });
+  }
+
+  @Patch(':id')
+  @Roles([RoleKeyEnum.ADMIN])
+  async update(@Param('id') id: string, @Body() payload: UserUpdateParamDto) {
+    const result = await this.userService.update(id, payload);
+    return wrapper.response({
+      data: result,
+      message: 'User updated successfully',
+    });
+  }
+
+  @Delete(':id')
+  @Roles([RoleKeyEnum.ADMIN])
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: string) {
+    await this.userService.remove(id);
+  }
+}

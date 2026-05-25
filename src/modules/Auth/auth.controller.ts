@@ -1,14 +1,11 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
-  Patch,
   Post,
   Request,
-  UseGuards,
 } from '@nestjs/common';
 import * as wrapper from '@shared/utils/wrapper';
 import { AuthService } from '@modules/Auth/auth.service';

@@ -23,10 +23,9 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    const valid = this.matchRoles(
-      roles,
-      user.roles.map((role) => role.key),
-    );
+    console.log({ user, roles });
+
+    const valid = roles.includes(user.role);
 
     if (!valid) {
       throw new ForbiddenException(
@@ -35,9 +34,5 @@ export class RolesGuard implements CanActivate {
     }
 
     return valid;
-  }
-
-  private matchRoles(roles: string[], userRoles: string[]): boolean {
-    return roles.some((role) => userRoles.includes(role));
   }
 }
