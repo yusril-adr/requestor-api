@@ -16,7 +16,7 @@ export class RequestInterceptor implements NestInterceptor {
       request.body = snakeToCamel(request.body);
     }
 
-    if (request.query) {
+    if (request.query && Object.keys(request.query).length > 0) {
       request.query = snakeToCamel(request.query);
     }
 

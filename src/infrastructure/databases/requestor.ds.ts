@@ -9,8 +9,8 @@ import { SnakeCaseNamingStrategy } from '@shared/strategies/snake-case-naming.st
 import { User } from '@entities/requestor/user.entity';
 import { Request } from '@entities/requestor/request.entity';
 import { AuditLog } from '@entities/requestor/audit-log.entity';
-import UserSeeder from 'seeders/requestor/user.seed';
-import RequestSeeder from 'seeders/requestor/request.seed';
+import UserSeeder from '../../../seeders/requestor/user.seed';
+import RequestSeeder from '../../../seeders/requestor/request.seed';
 
 // Load .env file
 config();

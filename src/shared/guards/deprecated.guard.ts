@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { CONFIG } from '@shared/constants/config';
+import { ConfigEnum } from '@shared/enums/config.enum';
 
 @Injectable()
 export class DeprecatedGuard implements CanActivate {
@@ -13,7 +13,7 @@ export class DeprecatedGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const isDeprecated = this.reflector.get<boolean>(
-      CONFIG.DEPRECATED_KEY,
+      ConfigEnum.DEPRECATED_KEY,
       context.getHandler(),
     );
 

@@ -3,16 +3,20 @@ import { BadRequestException, Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { snakeCase } from 'typeorm/util/StringUtils.js';
 
 import requestorDb from '@infrastructure/databases/requestor.ds';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { AccessTokenGuard } from '@shared/guards/access-token.guards';
-import { DeprecatedGuard } from '@shared/guards/deprecated.guards';
-import { snakeCase } from 'typeorm/util/StringUtils.js';
+import { AccessTokenGuard } from '@shared/guards/access-token.guard';
+import { RolesGuard } from '@shared/guards/role.guard';
+import { DeprecatedGuard } from '@shared/guards/deprecated.guard';
 import { replaceAllCamelCaseToSnakeCase } from '@shared/utils/common';
 import { RequestInterceptor } from '@shared/interceptors/request.interceptor';
 import { ResponseInterceptor } from '@shared/interceptors/response.interceptor';
 import { GlobalExceptionFilter } from '@shared/filters/global-exception.filter';
+
+import { AuthModule } from '@modules/Auth/auth.module';
+import { UserModule } from '@modules/User/user.module';
 
 @Module({
   imports: [
@@ -32,11 +36,18 @@ import { GlobalExceptionFilter } from '@shared/filters/global-exception.filter';
         fallthrough: true,
       },
     }),
+
+    AuthModule,
+    UserModule,
   ],
   providers: [
     {
       provide: APP_GUARD,
       useClass: AccessTokenGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
     {
       provide: APP_GUARD,
