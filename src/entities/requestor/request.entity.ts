@@ -14,7 +14,7 @@ export class Request extends BaseEntity {
   requestorName: string;
 
   @Column()
-  status: RequestStatusEnum;
+  status: RequestStatusEnum = RequestStatusEnum.INVITED;
 
   @Column()
   priority: RequestPriorityEnum;

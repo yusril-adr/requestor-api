@@ -17,6 +17,8 @@ import { GlobalExceptionFilter } from '@shared/filters/global-exception.filter';
 
 import { AuthModule } from '@modules/Auth/auth.module';
 import { UserModule } from '@modules/User/user.module';
+import { RequestModule } from '@modules/Request/request.module';
+import { AuditLogModule } from '@modules/AuditLog/audit-log.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { UserModule } from '@modules/User/user.module';
 
     AuthModule,
     UserModule,
+    RequestModule,
+    AuditLogModule,
   ],
   providers: [
     {

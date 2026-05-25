@@ -26,7 +26,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @Roles([RoleKeyEnum.ADMIN])
+  @Roles([RoleKeyEnum.ADMIN, RoleKeyEnum.OPERATOR])
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() payload: UserCreateParamDto) {
     const result = await this.userService.create(payload);
@@ -58,7 +58,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  @Roles([RoleKeyEnum.ADMIN])
+  @Roles([RoleKeyEnum.ADMIN, RoleKeyEnum.OPERATOR])
   async update(@Param('id') id: string, @Body() payload: UserUpdateParamDto) {
     const result = await this.userService.update(id, payload);
     return wrapper.response({
@@ -68,7 +68,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  @Roles([RoleKeyEnum.ADMIN])
+  @Roles([RoleKeyEnum.ADMIN, RoleKeyEnum.OPERATOR])
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
     await this.userService.remove(id);

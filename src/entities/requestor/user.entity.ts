@@ -19,7 +19,7 @@ export class User extends BaseEntity {
   role: RoleKeyEnum;
 
   @Column()
-  status: UserStatusEnum = UserStatusEnum.ACTIVE;
+  status: UserStatusEnum = UserStatusEnum.INVITED;
 }
 
 export type TUser = InstanceType<typeof User>;
