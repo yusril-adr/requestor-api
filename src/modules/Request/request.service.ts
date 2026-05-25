@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { FindManyOptions, FindOptionsWhere, ILike } from 'typeorm';
+import { DataSource, FindManyOptions, FindOptionsWhere, ILike } from 'typeorm';
 import { camelCase } from 'typeorm/util/StringUtils';
 import { RequestRepository } from './request.repository';
 import { RequestPaginateParamDto } from './dtos/params/request-paginate.param.dto';
@@ -8,14 +8,41 @@ import { RequestUpdateParamDto } from './dtos/params/request-update.param.dto';
 import { RequestEntityDto } from './dtos/results/request-entity.result.dto';
 import { mergeWhereConditions } from '@shared/utils/common';
 import { Request } from '@entities/requestor/request.entity';
+import { TJWTPayload } from '@shared/types/jwt-payload.type';
+import { AuditLogService } from '@modules/AuditLog/audit-log.service';
+import { AuditLogActionEnum } from '@shared/enums/audit-log.enum';
+import { EntityTypeEnum } from '@shared/enums/entity.enum';
 
 @Injectable()
 export class RequestService {
-  constructor(private readonly requestRepository: RequestRepository) {}
+  constructor(
+    private readonly requestRepository: RequestRepository,
+    private readonly auditLogService: AuditLogService,
+    private readonly dataSource: DataSource,
+  ) {}
 
-  async create(payload: RequestCreateParamDto): Promise<RequestEntityDto> {
-    const request = this.requestRepository.create(payload);
-    const saved = await this.requestRepository.save(request);
+  async create(
+    payload: RequestCreateParamDto,
+    user: TJWTPayload,
+  ): Promise<RequestEntityDto> {
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const requestRepo = manager.getRepository(Request);
+      const requestEntity = requestRepo.create(payload);
+      const result = await requestRepo.save(requestEntity);
+
+      await this.auditLogService.create(
+        {
+          actorName: user.name,
+          action: AuditLogActionEnum.CREATE,
+          targetType: EntityTypeEnum.REQUEST,
+          targetId: result.id,
+        },
+        manager,
+      );
+
+      return result;
+    });
+
     return new RequestEntityDto().parseEntity(saved);
   }
 
@@ -82,22 +109,58 @@ export class RequestService {
   async update(
     id: string,
     payload: RequestUpdateParamDto,
+    user: TJWTPayload,
   ): Promise<RequestEntityDto> {
-    const request = await this.requestRepository.findOne({ where: { id } });
-    if (!request) {
+    const requestEntity = await this.requestRepository.findOne({
+      where: { id },
+    });
+    if (!requestEntity) {
       throw new NotFoundException(`Request with id ${id} not found`);
     }
 
-    Object.assign(request, payload);
-    const saved = await this.requestRepository.save(request);
+    Object.assign(requestEntity, payload);
+
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const requestRepo = manager.getRepository(Request);
+      const result = await requestRepo.save(requestEntity);
+
+      await this.auditLogService.create(
+        {
+          actorName: user.name,
+          action: AuditLogActionEnum.UPDATE,
+          targetType: EntityTypeEnum.REQUEST,
+          targetId: result.id,
+        },
+        manager,
+      );
+
+      return result;
+    });
+
     return new RequestEntityDto().parseEntity(saved);
   }
 
-  async remove(id: string): Promise<void> {
-    const request = await this.requestRepository.findOne({ where: { id } });
-    if (!request) {
+  async remove(id: string, user: TJWTPayload): Promise<void> {
+    const requestEntity = await this.requestRepository.findOne({
+      where: { id },
+    });
+    if (!requestEntity) {
       throw new NotFoundException(`Request with id ${id} not found`);
     }
-    await this.requestRepository.softDelete(id);
+
+    await this.dataSource.transaction(async (manager) => {
+      const requestRepo = manager.getRepository(Request);
+      await requestRepo.softDelete(id);
+
+      await this.auditLogService.create(
+        {
+          actorName: user.name,
+          action: AuditLogActionEnum.DELETE,
+          targetType: EntityTypeEnum.REQUEST,
+          targetId: id,
+        },
+        manager,
+      );
+    });
   }
 }

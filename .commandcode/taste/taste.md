@@ -12,3 +12,5 @@
 - Use PATCH (not PUT) for update endpoints. Confidence: 0.65
 - For update DTOs, extend PartialType of the create DTO rather than redeclare all fields individually. Confidence: 0.65
 - Use dedicated param DTOs for create operations in services, not plain objects — even when the service method is only called internally by other modules. Confidence: 0.65
+- When passing user info from controller to service, pass the entire `request.user` (TJWTPayload) object rather than extracting individual fields like just the name. Confidence: 0.65
+- Wrap CUD service methods that perform multiple writes (entity mutation + audit log) in `dataSource.transaction()` to ensure atomicity, using `manager.getRepository()` inside the callback. Confidence: 0.70

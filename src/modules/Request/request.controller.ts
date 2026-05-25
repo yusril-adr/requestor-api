@@ -9,10 +9,12 @@ import {
   Patch,
   Post,
   Query,
+  Request,
 } from '@nestjs/common';
 import * as wrapper from '@shared/utils/wrapper';
 import { Roles } from '@shared/decorators/role.decorator';
 import { RoleKeyEnum } from '@shared/enums/role.enum';
+import type { TRequestUser } from '@shared/types/request.type';
 import { RequestService } from './request.service';
 import { RequestPaginateParamDto } from './dtos/params/request-paginate.param.dto';
 import { RequestCreateParamDto } from './dtos/params/request-create.param.dto';
@@ -28,8 +30,11 @@ export class RequestController {
   @Post()
   @Roles([RoleKeyEnum.ADMIN])
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() payload: RequestCreateParamDto) {
-    const result = await this.requestService.create(payload);
+  async create(
+    @Request() request: TRequestUser,
+    @Body() payload: RequestCreateParamDto,
+  ) {
+    const result = await this.requestService.create(payload, request.user);
     return wrapper.response({
       statusCode: HttpStatus.CREATED,
       data: result,
@@ -60,10 +65,11 @@ export class RequestController {
   @Patch(':id')
   @Roles([RoleKeyEnum.ADMIN])
   async update(
+    @Request() request: TRequestUser,
     @Param('id') id: string,
     @Body() payload: RequestUpdateParamDto,
   ) {
-    const result = await this.requestService.update(id, payload);
+    const result = await this.requestService.update(id, payload, request.user);
     return wrapper.response({
       data: result,
       message: 'Request updated successfully',
@@ -73,7 +79,10 @@ export class RequestController {
   @Delete(':id')
   @Roles([RoleKeyEnum.ADMIN])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string) {
-    await this.requestService.remove(id);
+  async remove(
+    @Request() request: TRequestUser,
+    @Param('id') id: string,
+  ) {
+    await this.requestService.remove(id, request.user);
   }
 }

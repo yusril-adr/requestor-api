@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { FindManyOptions, FindOptionsWhere, ILike } from 'typeorm';
+import { DataSource, FindManyOptions, FindOptionsWhere, ILike } from 'typeorm';
 import { camelCase } from 'typeorm/util/StringUtils';
 import { UserRepository } from './user.repository';
 import { UserPaginateParamDto } from './dtos/params/user-paginate.param.dto';
@@ -14,12 +14,23 @@ import { UserEntityDto } from './dtos/results/user-entity.result.dto';
 import { mergeWhereConditions } from '@shared/utils/common';
 import { User } from '@entities/requestor/user.entity';
 import { UserStatusEnum } from '@shared/enums/user.enum';
+import { TJWTPayload } from '@shared/types/jwt-payload.type';
+import { AuditLogService } from '@modules/AuditLog/audit-log.service';
+import { AuditLogActionEnum } from '@shared/enums/audit-log.enum';
+import { EntityTypeEnum } from '@shared/enums/entity.enum';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly auditLogService: AuditLogService,
+    private readonly dataSource: DataSource,
+  ) {}
 
-  async create(payload: UserCreateParamDto): Promise<UserEntityDto> {
+  async create(
+    payload: UserCreateParamDto,
+    user: TJWTPayload,
+  ): Promise<UserEntityDto> {
     const existing = await this.userRepository.findOne({
       where: { email: payload.email },
     });
@@ -28,11 +39,28 @@ export class UserService {
     }
 
     const hashedPassword = await bcrypt.hash(payload.password, 10);
-    const user = this.userRepository.create({
-      ...payload,
-      password: hashedPassword,
+
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const userRepo = manager.getRepository(User);
+      const userEntity = userRepo.create({
+        ...payload,
+        password: hashedPassword,
+      });
+      const result = await userRepo.save(userEntity);
+
+      await this.auditLogService.create(
+        {
+          actorName: user.name,
+          action: AuditLogActionEnum.CREATE,
+          targetType: EntityTypeEnum.USER,
+          targetId: result.id,
+        },
+        manager,
+      );
+
+      return result;
     });
-    const saved = await this.userRepository.save(user);
+
     return new UserEntityDto().parseEntity(saved);
   }
 
@@ -96,13 +124,14 @@ export class UserService {
   async update(
     id: string,
     payload: UserUpdateParamDto,
+    user: TJWTPayload,
   ): Promise<UserEntityDto> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
+    const userEntity = await this.userRepository.findOne({ where: { id } });
+    if (!userEntity) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    if (payload.email && payload.email !== user.email) {
+    if (payload.email && payload.email !== userEntity.email) {
       const existing = await this.userRepository.findOne({
         where: { email: payload.email },
       });
@@ -115,16 +144,47 @@ export class UserService {
       payload.password = await bcrypt.hash(payload.password, 10);
     }
 
-    Object.assign(user, payload);
-    const saved = await this.userRepository.save(user);
+    Object.assign(userEntity, payload);
+
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const userRepo = manager.getRepository(User);
+      const result = await userRepo.save(userEntity);
+
+      await this.auditLogService.create(
+        {
+          actorName: user.name,
+          action: AuditLogActionEnum.UPDATE,
+          targetType: EntityTypeEnum.USER,
+          targetId: result.id,
+        },
+        manager,
+      );
+
+      return result;
+    });
+
     return new UserEntityDto().parseEntity(saved);
   }
 
-  async remove(id: string): Promise<void> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
+  async remove(id: string, user: TJWTPayload): Promise<void> {
+    const userEntity = await this.userRepository.findOne({ where: { id } });
+    if (!userEntity) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
-    await this.userRepository.softDelete(id);
+
+    await this.dataSource.transaction(async (manager) => {
+      const userRepo = manager.getRepository(User);
+      await userRepo.softDelete(id);
+
+      await this.auditLogService.create(
+        {
+          actorName: user.name,
+          action: AuditLogActionEnum.DELETE,
+          targetType: EntityTypeEnum.USER,
+          targetId: id,
+        },
+        manager,
+      );
+    });
   }
 }

@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { FindManyOptions, FindOptionsWhere, ILike } from 'typeorm';
+import {
+  EntityManager,
+  FindManyOptions,
+  FindOptionsWhere,
+  ILike,
+} from 'typeorm';
 import { camelCase } from 'typeorm/util/StringUtils';
 import { AuditLogRepository } from './audit-log.repository';
 import { AuditLogPaginateParamDto } from './dtos/params/audit-log-paginate.param.dto';
@@ -12,9 +17,16 @@ import { AuditLog } from '@entities/requestor/audit-log.entity';
 export class AuditLogService {
   constructor(private readonly auditLogRepository: AuditLogRepository) {}
 
-  async create(payload: AuditLogCreateParamDto): Promise<AuditLogEntityDto> {
-    const auditLog = this.auditLogRepository.create(payload);
-    const saved = await this.auditLogRepository.save(auditLog);
+  async create(
+    payload: AuditLogCreateParamDto,
+    transactionalEntityManager: EntityManager | null,
+  ): Promise<AuditLogEntityDto> {
+    const auditLogRepository =
+      transactionalEntityManager?.getRepository(AuditLog) ??
+      this.auditLogRepository;
+
+    const auditLog = auditLogRepository.create(payload);
+    const saved = await auditLogRepository.save(auditLog);
     return new AuditLogEntityDto().parseEntity(saved);
   }
 
