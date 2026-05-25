@@ -1,0 +1,20 @@
+---
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${REQUESTOR_DB_USERNAME:-root123}
+      POSTGRES_PASSWORD: ${REQUESTOR_DB_PASSWORD:-requestor}
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  # Use this if need UI to access the database
+  # adminer:
+  #   image: adminer
+  #   ports:
+  #     - 8080:8080
+
+volumes:
+  postgres-data: {}

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Admin",
+    "email": "admin@example.com",
+    "role": "admin",
+    "status": "active"
+  },
+  {
+    "name": "Operator",
+    "email": "operator@example.com",
+    "role": "operator",
+    "status": "active"
+  },
+  {
+    "name": "Viewer 1",
+    "email": "viewer+1@example.com",
+    "role": "viewer",
+    "status": "active"
+  },
+  {
+    "name": "Viewer 2",
+    "email": "viewer+2@example.com",
+    "role": "viewer",
+    "status": "active"
+  },
+  {
+    "name": "Viewer 3",
+    "email": "viewer+3@example.com",
+    "role": "viewer",
+    "status": "active"
+  },
+  {
+    "name": "Viewer 4",
+    "email": "viewer+4@example.com",
+    "role": "viewer",
+    "status": "active"
+  },
+  {
+    "name": "Viewer 5",
+    "email": "viewer+5@example.com",
+    "role": "viewer",
+    "status": "active"
+  },
+  {
+    "name": "Viewer 6",
+    "email": "viewer+6@example.com",
+    "role": "viewer",
+    "status": "active"
+  },
+  {
+    "name": "Viewer 7",
+    "email": "viewer+7@example.com",
+    "role": "viewer",
+    "status": "active"
+  },
+  {
+    "name": "Viewer 8",
+    "email": "viewer+8@example.com",
+    "role": "viewer",
+    "status": "active"
+  }
+]
