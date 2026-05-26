@@ -1,20 +1,20 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsDefined, IsString } from 'class-validator';
 import { AuditLogActionEnum } from '@shared/enums/audit-log.enum';
 import { EntityTypeEnum } from '@shared/enums/entity.enum';
 
 export class AuditLogCreateParamDto {
   @IsString()
-  @IsNotEmpty()
+  @IsDefined()
   actorName: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsDefined()
   action: AuditLogActionEnum | string;
 
   @IsEnum(EntityTypeEnum)
   targetType: EntityTypeEnum;
 
   @IsString()
-  @IsNotEmpty()
+  @IsDefined()
   targetId: string;
 }

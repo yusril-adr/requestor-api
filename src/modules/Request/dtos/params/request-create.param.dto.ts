@@ -1,20 +1,18 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import {
-  RequestStatusEnum,
-  RequestPriorityEnum,
-} from '@shared/enums/request.enum';
+import { IsEnum, IsDefined, IsOptional, IsString } from 'class-validator';
+import { RequestPriorityEnum } from '@shared/enums/request.enum';
 
 export class RequestCreateParamDto {
   @IsString()
-  @IsNotEmpty()
+  @IsDefined()
   title: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsDefined()
   requestorName: string;
 
+  @IsDefined()
   @IsEnum(RequestPriorityEnum)
-  priority: RequestPriorityEnum;
+  priority: RequestPriorityEnum = RequestPriorityEnum.LOW;
 
   @IsOptional()
   @IsString()

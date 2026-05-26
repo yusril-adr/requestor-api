@@ -19,7 +19,6 @@ export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly configService: ConfigService,
-    private dataSource: DataSource,
   ) {}
 
   async loginByPassword({

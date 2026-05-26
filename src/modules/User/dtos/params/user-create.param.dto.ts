@@ -1,7 +1,7 @@
 import {
   IsEmail,
   IsEnum,
-  IsNotEmpty,
+  IsDefined,
   IsOptional,
   IsString,
   MinLength,
@@ -10,16 +10,16 @@ import { RoleKeyEnum } from '@shared/enums/role.enum';
 
 export class UserCreateParamDto {
   @IsString()
-  @IsNotEmpty()
+  @IsDefined()
   name: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsDefined()
   @IsEmail()
   email: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsDefined()
   @MinLength(8)
   password: string;
 

@@ -63,13 +63,31 @@ import { AuditLogModule } from '@modules/AuditLog/audit-log.module';
         new ValidationPipe({
           transform: true,
           exceptionFactory: (errors) => {
-            const result = errors.map((error) => ({
-              property: snakeCase(error.property),
-              message: replaceAllCamelCaseToSnakeCase(
-                // @ts-ignore
-                error.constraints[Object.keys(error.constraints)[0]],
-              ),
-            }));
+            const flattenErrors = (
+              validationErrors: any[],
+              parentPath = '',
+            ): any[] => {
+              return validationErrors.flatMap((error) => {
+                const path = parentPath
+                  ? `${parentPath}.${snakeCase(error.property)}`
+                  : snakeCase(error.property);
+
+                if (error.constraints) {
+                  return {
+                    property: path,
+                    messages: Object.keys(error.constraints).map((key) =>
+                      replaceAllCamelCaseToSnakeCase(error.constraints[key]),
+                    ),
+                  };
+                }
+                if (error.children?.length) {
+                  return flattenErrors(error.children, path);
+                }
+                return [];
+              });
+            };
+
+            const result = flattenErrors(errors);
             return new BadRequestException(result);
           },
         }),
