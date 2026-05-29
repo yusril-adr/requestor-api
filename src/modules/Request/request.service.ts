@@ -89,12 +89,16 @@ export class RequestService {
     query: FindManyOptions<Request>,
     queryDto: RequestPaginateParamDto,
   ): FindManyOptions<Request> {
-    const filters: (FindOptionsWhere<Request> | null)[] = [
-      queryDto.status ? { status: queryDto.status } : null,
-      queryDto.priority ? { priority: queryDto.priority } : null,
-    ].filter(Boolean);
+    const filters: FindOptionsWhere<Request> = {};
 
-    query.where = mergeWhereConditions(query.where, ...filters);
+    if (queryDto.status) {
+      filters.status = queryDto.status;
+    }
+    if (queryDto.priority) {
+      filters.priority = queryDto.priority;
+    }
+
+    query.where = mergeWhereConditions(query.where, filters);
     return query;
   }
 

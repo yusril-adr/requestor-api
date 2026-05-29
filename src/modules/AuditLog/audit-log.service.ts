@@ -73,12 +73,17 @@ export class AuditLogService {
     query: FindManyOptions<AuditLog>,
     queryDto: AuditLogPaginateParamDto,
   ): FindManyOptions<AuditLog> {
-    const filters: (FindOptionsWhere<AuditLog> | null)[] = [
-      queryDto.action ? { action: queryDto.action } : null,
-      queryDto.targetType ? { targetType: queryDto.targetType } : null,
-    ].filter(Boolean);
+    const filters: FindOptionsWhere<AuditLog> = {};
 
-    query.where = mergeWhereConditions(query.where, ...filters);
+    if (queryDto.action) {
+      filters.action = queryDto.action;
+    }
+
+    if (queryDto.targetType) {
+      filters.targetType = queryDto.targetType;
+    }
+
+    query.where = mergeWhereConditions(query.where, filters);
     return query;
   }
 }

@@ -76,11 +76,8 @@ export function replaceAllCamelCaseToSnakeCase(str: string): string {
 }
 
 export function mergeWhereConditions<T>(
-  existingWhere:
-    | FindOptionsWhere<T>
-    | (FindOptionsWhere<T> | null)[]
-    | undefined,
-  ...newConditions: (FindOptionsWhere<T> | null)[]
+  existingWhere: FindOptionsWhere<T> | FindOptionsWhere<T>[] | undefined,
+  ...newConditions: FindOptionsWhere<T>[]
 ): FindOptionsWhere<T>[] {
   const conditionsArray = Array.isArray(existingWhere)
     ? existingWhere

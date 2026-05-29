@@ -104,12 +104,16 @@ export class UserService {
     query: FindManyOptions<User>,
     queryDto: UserPaginateParamDto,
   ): FindManyOptions<User> {
-    const filters: (FindOptionsWhere<User> | null)[] = [
-      queryDto.role ? { role: queryDto.role } : null,
-      queryDto.status ? { status: queryDto.status } : null,
-    ].filter(Boolean); // Remove null values
+    const filters: FindOptionsWhere<User> = {};
 
-    query.where = mergeWhereConditions(query.where, ...filters);
+    if (queryDto.role) {
+      filters.role = queryDto.role;
+    }
+    if (queryDto.status) {
+      filters.status = queryDto.status;
+    }
+
+    query.where = mergeWhereConditions(query.where, filters);
     return query;
   }
 
