@@ -79,10 +79,7 @@ export class UserController {
   @Delete(':id')
   @Roles([RoleKeyEnum.ADMIN, RoleKeyEnum.OPERATOR])
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(
-    @Request() request: TRequestUser,
-    @Param('id') id: string,
-  ) {
+  async remove(@Request() request: TRequestUser, @Param('id') id: string) {
     await this.userService.remove(id, request.user);
   }
 }

@@ -1,7 +1,6 @@
 import {
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -29,7 +28,7 @@ export class RefreshTokenGuard implements CanActivate {
       request['token'] = token;
     } catch (error) {
       if (error instanceof jwt.JsonWebTokenError) {
-        throw new ForbiddenException('Token expired');
+        throw new UnauthorizedException('Token expired');
       }
 
       throw new UnauthorizedException();
