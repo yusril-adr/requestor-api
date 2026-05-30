@@ -13,7 +13,6 @@ import { UserUpdateParamDto } from './dtos/params/user-update.param.dto';
 import { UserEntityDto } from './dtos/results/user-entity.result.dto';
 import { mergeWhereConditions } from '@shared/utils/common';
 import { User } from '@entities/requestor/user.entity';
-import { UserStatusEnum } from '@shared/enums/user.enum';
 import { TJWTPayload } from '@shared/types/jwt-payload.type';
 import { AuditLogService } from '@modules/AuditLog/audit-log.service';
 import { AuditLogActionEnum } from '@shared/enums/audit-log.enum';
