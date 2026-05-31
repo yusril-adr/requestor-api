@@ -6,7 +6,10 @@ import { RequestPaginateParamDto } from './dtos/params/request-paginate.param.dt
 import { RequestCreateParamDto } from './dtos/params/request-create.param.dto';
 import { RequestUpdateParamDto } from './dtos/params/request-update.param.dto';
 import { RequestEntityDto } from './dtos/results/request-entity.result.dto';
-import { mergeWhereConditions } from '@shared/utils/common';
+import {
+  mergeEachWhereConditions,
+  mergeWhereConditions,
+} from '@shared/utils/common';
 import { Request } from '@entities/requestor/request.entity';
 import { TJWTPayload } from '@shared/types/jwt-payload.type';
 import { AuditLogService } from '@modules/AuditLog/audit-log.service';
@@ -76,11 +79,18 @@ export class RequestService {
     queryDto: RequestPaginateParamDto,
   ): FindManyOptions<Request> {
     if (queryDto.search) {
-      const searchCondition: FindOptionsWhere<Request> = {
-        title: ILike(`%${queryDto.search}%`),
-        requestorName: ILike(`%${queryDto.search}%`),
-      };
-      query.where = mergeWhereConditions(query.where, searchCondition);
+      const searchCondition: FindOptionsWhere<Request>[] = [
+        {
+          title: ILike(`%${queryDto.search}%`),
+        },
+        {
+          requestorName: ILike(`%${queryDto.search}%`),
+        },
+        {
+          assigneeName: ILike(`%${queryDto.search}%`),
+        },
+      ];
+      query.where = mergeWhereConditions(query.where, ...searchCondition);
     }
     return query;
   }
@@ -98,7 +108,8 @@ export class RequestService {
       filters.priority = queryDto.priority;
     }
 
-    query.where = mergeWhereConditions(query.where, filters);
+    query.where = mergeEachWhereConditions(query.where, filters);
+
     return query;
   }
 

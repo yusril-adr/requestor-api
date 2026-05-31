@@ -11,7 +11,10 @@ import { UserPaginateParamDto } from './dtos/params/user-paginate.param.dto';
 import { UserCreateParamDto } from './dtos/params/user-create.param.dto';
 import { UserUpdateParamDto } from './dtos/params/user-update.param.dto';
 import { UserEntityDto } from './dtos/results/user-entity.result.dto';
-import { mergeWhereConditions } from '@shared/utils/common';
+import {
+  mergeEachWhereConditions,
+  mergeWhereConditions,
+} from '@shared/utils/common';
 import { User } from '@entities/requestor/user.entity';
 import { TJWTPayload } from '@shared/types/jwt-payload.type';
 import { AuditLogService } from '@modules/AuditLog/audit-log.service';
@@ -90,11 +93,15 @@ export class UserService {
     queryDto: UserPaginateParamDto,
   ): FindManyOptions<User> {
     if (queryDto.search) {
-      const searchCondition: FindOptionsWhere<User> = {
-        name: ILike(`%${queryDto.search}%`),
-        email: ILike(`%${queryDto.search}%`),
-      };
-      query.where = mergeWhereConditions(query.where, searchCondition);
+      const searchCondition: FindOptionsWhere<User>[] = [
+        {
+          name: ILike(`%${queryDto.search}%`),
+        },
+        {
+          email: ILike(`%${queryDto.search}%`),
+        },
+      ];
+      query.where = mergeWhereConditions(query.where, ...searchCondition);
     }
     return query;
   }
@@ -112,7 +119,7 @@ export class UserService {
       filters.status = queryDto.status;
     }
 
-    query.where = mergeWhereConditions(query.where, filters);
+    query.where = mergeEachWhereConditions(query.where, filters);
     return query;
   }
 

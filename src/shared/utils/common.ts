@@ -90,3 +90,19 @@ export function mergeWhereConditions<T>(
     ...(newConditions as FindOptionsWhere<T>[]),
   ];
 }
+
+export function mergeEachWhereConditions<T>(
+  existingWhere: FindOptionsWhere<T> | FindOptionsWhere<T>[] | undefined,
+  newConditions: FindOptionsWhere<T>,
+): FindOptionsWhere<T>[] {
+  const conditionsArray = Array.isArray(existingWhere)
+    ? existingWhere
+    : existingWhere
+      ? [existingWhere]
+      : [newConditions];
+
+  return conditionsArray.map((condition) => ({
+    ...condition,
+    ...newConditions,
+  }));
+}

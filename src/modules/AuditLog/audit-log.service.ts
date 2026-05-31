@@ -10,7 +10,10 @@ import { AuditLogRepository } from './audit-log.repository';
 import { AuditLogPaginateParamDto } from './dtos/params/audit-log-paginate.param.dto';
 import { AuditLogCreateParamDto } from './dtos/params/audit-log-create.param.dto';
 import { AuditLogEntityDto } from './dtos/results/audit-log-entity.result.dto';
-import { mergeWhereConditions } from '@shared/utils/common';
+import {
+  mergeEachWhereConditions,
+  mergeWhereConditions,
+} from '@shared/utils/common';
 import { AuditLog } from '@entities/requestor/audit-log.entity';
 
 @Injectable()
@@ -60,11 +63,15 @@ export class AuditLogService {
     queryDto: AuditLogPaginateParamDto,
   ): FindManyOptions<AuditLog> {
     if (queryDto.search) {
-      const searchCondition: FindOptionsWhere<AuditLog> = {
-        actorName: ILike(`%${queryDto.search}%`),
-        action: ILike(`%${queryDto.search}%`),
-      };
-      query.where = mergeWhereConditions(query.where, searchCondition);
+      const searchCondition: FindOptionsWhere<AuditLog>[] = [
+        {
+          actorName: ILike(`%${queryDto.search}%`),
+        },
+        {
+          action: ILike(`%${queryDto.search}%`),
+        },
+      ];
+      query.where = mergeWhereConditions(query.where, ...searchCondition);
     }
     return query;
   }
@@ -83,7 +90,7 @@ export class AuditLogService {
       filters.targetType = queryDto.targetType;
     }
 
-    query.where = mergeWhereConditions(query.where, filters);
+    query.where = mergeEachWhereConditions(query.where, filters);
     return query;
   }
 }
