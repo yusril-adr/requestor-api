@@ -24,6 +24,7 @@ import { AuditLogModule } from '@modules/AuditLog/audit-log.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      ignoreEnvVars: process.env.NODE_ENV === 'production',
     }),
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
