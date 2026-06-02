@@ -5,16 +5,41 @@ services:
     environment:
       POSTGRES_USER: ${REQUESTOR_DB_USERNAME:-root123}
       POSTGRES_PASSWORD: ${REQUESTOR_DB_PASSWORD:-requestor}
+      POSTGRES_DB: ${REQUESTOR_DB_DATABASE:-requestor}
     ports:
-      - 5432:5432
+      - &db_port "${REQUESTOR_DB_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${REQUESTOR_DB_USERNAME:-root123}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # Use this if need UI to access the database
-  # adminer:
-  #   image: adminer
-  #   ports:
-  #     - 8080:8080
+  api:
+    build: .
+    ports:
+      - "${APP_PORT:-8000}:${APP_PORT:-8000}"
+    environment:
+      NODE_ENV: production
+      APP_NAME: ${APP_NAME:-MyApp}
+      APP_KEY: ${APP_KEY:-base64:randomkey}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_PORT: ${APP_PORT:-8000}
+      APP_TZ: ${APP_TZ:-UTC}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      REQUESTOR_DB_HOST: postgres
+      REQUESTOR_DB_PORT: "5432"
+      REQUESTOR_DB_USERNAME: ${REQUESTOR_DB_USERNAME:-root123}
+      REQUESTOR_DB_PASSWORD: ${REQUESTOR_DB_PASSWORD:-requestor}
+      REQUESTOR_DB_DATABASE: ${REQUESTOR_DB_DATABASE:-requestor}
+      REQUESTOR_DB_POOL_SIZE: ${REQUESTOR_DB_POOL_SIZE:-10}
+      REQUESTOR_DB_CONNECT_TIMEOUT_IN_MS: ${REQUESTOR_DB_CONNECT_TIMEOUT_IN_MS:-30000}
+      ACCESS_TOKEN_KEY: ${ACCESS_TOKEN_KEY:-change_me_in_production}
+      ACCESS_EXPIRES_IN_SECONDS: ${ACCESS_EXPIRES_IN_SECONDS:-86400}
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres-data: {}
