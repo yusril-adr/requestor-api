@@ -1,11 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TJWTPayload } from '@shared/types/jwt-payload.type';
 import dayjs from '@shared/utils/dayjs';
@@ -79,7 +74,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException('Token is invalid');
+      throw new UnauthorizedException('User not found');
     }
 
     return new UserEntityDto().parseEntity(user);
